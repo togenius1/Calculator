@@ -24,6 +24,8 @@ const Calculator2 = ({nextScreen}: Props) => {
   const [sigmaPressed, setSigmaPressed] = useState<boolean>(false);
   const [equalPressed, setEqualPressed] = useState<boolean>(true);
 
+  // let digits = 0;
+
   const nextOrEq = sigmaPressed ? '=' : next;
 
   const numeric = [
@@ -49,7 +51,6 @@ const Calculator2 = ({nextScreen}: Props) => {
 
   function validate() {
     const text = resultText;
-    // console.log('Validate ', text.slice(-1));
     switch (text.slice(-1)) {
       case '+':
       case '-':
@@ -60,7 +61,7 @@ const Calculator2 = ({nextScreen}: Props) => {
     return true;
   }
 
-  function calculateResult() {
+  function calculator() {
     const text = resultText; //now parse this text, ex- 3+3*6^5/2+7
     if (eval(text) === undefined) {
       setCalculatedText('0');
@@ -70,8 +71,8 @@ const Calculator2 = ({nextScreen}: Props) => {
   }
 
   function clearScreen() {
-    setResultText('');
-    setCalculatedText('');
+    setResultText('0');
+    setCalculatedText('0');
     setSigmaPressed(false);
     setEqualPressed(true);
   }
@@ -99,30 +100,36 @@ const Calculator2 = ({nextScreen}: Props) => {
     if (text === '=') {
       operate('sigma');
       operate('equalPressed');
-      return validate() && calculateResult();
+      return validate() && calculator();
     }
+    //----------------------------------------------------------------
     if (text !== '=' && text !== sigma && !sigmaPressed) {
+      const splitText = resultText.split(/[^0-9\.]+/);
+      if (text === '.' && splitText[splitText.length - 1].includes('.')) {
+        setResultText(resultText);
+        return;
+      }
       const serialText = resultText + text;
       const result = serialText.replace(/^0+/, '');
 
-      console.log('Sigma first pressed:----->  ', result);
       setResultText(result);
     }
+    //----------------------------------------------------------------
     if (text !== '=' && text !== sigma && sigmaPressed) {
+      const splitText = resultText.split(/[^0-9\.]+/);
+      if (text === '.' && splitText[splitText.length - 1].includes('.')) {
+        setResultText(resultText);
+        return;
+      }
       const serialText = resultText + text;
       const result = serialText.replace(/^0+/, '');
-      // cut object out
 
-      console.log('Sigma Second pressed:----->  ', result);
       setResultText(result);
     }
   }
 
   function operate(operation: string) {
     switch (operation) {
-      case '0':
-        setCalculatedText(0);
-        break;
       case 'del':
         const text = resultText.split('');
         text.pop();
@@ -134,7 +141,6 @@ const Calculator2 = ({nextScreen}: Props) => {
       case 'sigma':
         setSigmaPressed(!sigmaPressed);
         setEqualPressed(true);
-
         break;
       case 'equalPressed':
         setEqualPressed(false);
@@ -148,6 +154,7 @@ const Calculator2 = ({nextScreen}: Props) => {
       case '*':
       case '/':
         const lastChar = resultText.split('').pop();
+        // console.log(ops.indexOf(lastChar));
         if (ops.indexOf(lastChar) > 0) {
           return;
         }
@@ -155,22 +162,31 @@ const Calculator2 = ({nextScreen}: Props) => {
           return;
         }
         // check if pressed ops > one time
-        if (
-          resultText[resultText.length - 1] === '+' ||
-          resultText[resultText.length - 1] === '-' ||
-          resultText[resultText.length - 1] === '*' ||
-          resultText[resultText.length - 1] === '/'
-        ) {
-          return;
-        }
+        // if (
+        //   resultText[resultText.length - 1] === '+' ||
+        //   resultText[resultText.length - 1] === '-' ||
+        //   resultText[resultText.length - 1] === '*' ||
+        //   resultText[resultText.length - 1] === '/'
+        // ) {
+        //   return;
+        // }
         setResultText(resultText + operation);
         break;
     }
   }
 
-  //   Navigator
+  let passingValue;
+  if (sigma && !sigmaPressed) {
+    passingValue = resultText;
+  }
+  if (sigma && sigmaPressed) {
+    passingValue = calculatedText;
+  }
+
   function gotoNextScreen() {
-    navigation.navigate(nextScreen, {});
+    navigation.navigate(nextScreen, {
+      passingValue: passingValue,
+    });
     clearScreen();
   }
 
@@ -196,17 +212,19 @@ const Calculator2 = ({nextScreen}: Props) => {
       <View style={styles.calculatedContainer}>
         {sigmaPressed || !equalPressed ? (
           <Text style={styles.calculatedText}>
-            {currencyFormatter(+calculatedText, {
+            {calculatedText}
+            {/* {currencyFormatter(+calculatedText, {
               symbol: '',
-              significantDigits: 0,
-            })}
+              significantDigits: digits,
+            })} */}
           </Text>
         ) : (
           <Text style={styles.calculatedText}>
-            {currencyFormatter(+resultText, {
+            {resultText}
+            {/* {currencyFormatter(+resultText, {
               symbol: '',
-              significantDigits: 0,
-            })}
+              significantDigits: digits,
+            })} */}
           </Text>
         )}
       </View>

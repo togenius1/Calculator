@@ -3,10 +3,11 @@ import React from 'react';
 
 type Props = {};
 
-const NextScreen = (props: Props) => {
+const NextScreen = ({route}: Props) => {
+  console.log('next screen: ', route.params.passingValue);
   return (
     <View>
-      <Text>NextScreen</Text>
+      <Text>Next Screen: {route.params.passingValue}</Text>
     </View>
   );
 };
