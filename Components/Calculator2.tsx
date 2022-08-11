@@ -19,38 +19,46 @@ const next = (
 const ops = ['/', '*', '-', '+'];
 
 const Calculator2 = ({nextScreen}: Props) => {
-  const [resultText, setResultText] = useState('');
-  const [calculatedText, setCalculatedText] = useState('0');
-  const [sigmaPressed, setSigmaPressed] = useState(false);
-  const [equalPressed, setEqualPressed] = useState(true);
+  const [resultText, setResultText] = useState<string | null>('0');
+  const [calculatedText, setCalculatedText] = useState<string | null>('0');
+  const [sigmaPressed, setSigmaPressed] = useState<boolean>(false);
+  const [equalPressed, setEqualPressed] = useState<boolean>(true);
 
   const nextOrEq = sigmaPressed ? '=' : next;
 
   const numeric = [
-    7,
-    8,
-    9,
+    '7',
+    '8',
+    '9',
     del,
-    4,
-    5,
-    6,
+    '4',
+    '5',
+    '6',
     'C',
-    1,
-    2,
-    3,
+    '1',
+    '2',
+    '3',
     sigma,
     '.',
-    0,
+    '0',
     '00',
     nextOrEq,
   ];
 
-  console.log('resultText ', resultText);
-  console.log('calculatedText ', calculatedText);
-  console.log('sigmaPressed ', sigmaPressed);
-  console.log('equalPressed ', equalPressed);
-
   const navigation = useNavigation();
+
+  function validate() {
+    const text = resultText;
+    // console.log('Validate ', text.slice(-1));
+    switch (text.slice(-1)) {
+      case '+':
+      case '-':
+      case '*':
+      case '/':
+        return false;
+    }
+    return true;
+  }
 
   function calculateResult() {
     const text = resultText; //now parse this text, ex- 3+3*6^5/2+7
@@ -68,18 +76,6 @@ const Calculator2 = ({nextScreen}: Props) => {
     setEqualPressed(true);
   }
 
-  function validate() {
-    const text = resultText;
-    switch (text.slice(-1)) {
-      case '+':
-      case '-':
-      case '*':
-      case '/':
-        return false;
-    }
-    return true;
-  }
-
   function buttonPressed(text) {
     if (text === del) {
       operate('del');
@@ -91,7 +87,10 @@ const Calculator2 = ({nextScreen}: Props) => {
     }
     if (text === sigma) {
       operate('sigma');
-      return;
+      if (sigmaPressed === true) {
+        setResultText('0');
+        setCalculatedText('0');
+      }
     }
     if (text === next) {
       operate('next');
@@ -102,14 +101,19 @@ const Calculator2 = ({nextScreen}: Props) => {
       operate('equalPressed');
       return validate() && calculateResult();
     }
-    if (text !== '=' && !sigmaPressed) {
+    if (text !== '=' && text !== sigma && !sigmaPressed) {
       const serialText = resultText + text;
       const result = serialText.replace(/^0+/, '');
+
+      console.log('Sigma first pressed:----->  ', result);
       setResultText(result);
     }
-    if (text !== '=' && sigmaPressed) {
+    if (text !== '=' && text !== sigma && sigmaPressed) {
       const serialText = resultText + text;
       const result = serialText.replace(/^0+/, '');
+      // cut object out
+
+      console.log('Sigma Second pressed:----->  ', result);
       setResultText(result);
     }
   }
@@ -130,6 +134,7 @@ const Calculator2 = ({nextScreen}: Props) => {
       case 'sigma':
         setSigmaPressed(!sigmaPressed);
         setEqualPressed(true);
+
         break;
       case 'equalPressed':
         setEqualPressed(false);
@@ -149,6 +154,15 @@ const Calculator2 = ({nextScreen}: Props) => {
         if (resultText === '') {
           return;
         }
+        // check if pressed ops > one time
+        if (
+          resultText[resultText.length - 1] === '+' ||
+          resultText[resultText.length - 1] === '-' ||
+          resultText[resultText.length - 1] === '*' ||
+          resultText[resultText.length - 1] === '/'
+        ) {
+          return;
+        }
         setResultText(resultText + operation);
         break;
     }
@@ -157,6 +171,7 @@ const Calculator2 = ({nextScreen}: Props) => {
   //   Navigator
   function gotoNextScreen() {
     navigation.navigate(nextScreen, {});
+    clearScreen();
   }
 
   return (

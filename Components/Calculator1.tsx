@@ -1,8 +1,9 @@
 import {StyleSheet, Text, View, Dimensions, Pressable} from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import {currencyFormatter} from '../../util/currencyFormatter';
+import {currencyFormatter} from '../util/currencyFormatter';
 
 type Props = {
   nextScreen: string;
